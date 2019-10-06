@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+#
+# Program to write random playlist to a m3u
+#
+# Copyright (c) Oliver Baker 2019
+#
+import os
+import sys
+import fnmatch
+import random
+import os.path
+#import mad
+from mutagen.mp3 import MP3
+source_path="/home/pi/Music/oliver"
+playlist = '/home/pi/alarms/alarmlist.m3u'
+max_length = 900
+length = 0
+flist = []
+for root, dirs, files in os.walk(source_path):
+  for name in files:
+    fullname=os.path.join(root,name)
+    if (fnmatch.fnmatch(fullname,'*.mp3')):
+      flist.append(fullname)
+##clear playlist file
+clear_playlist = open(playlist,'w')
+clear_playlist.write("#EXTM3U\n")
+clear_playlist.close()
+while length < max_length:
+  file=random.choice(flist)
+  currentfile = MP3(file)
+  currenttime = currentfile.info.length
+  print (currenttime)
+  length = length + currenttime
+  print (length)
+  playlist_file = open(playlist,'a')
+  playlist_file.write("\n"+file)
+  playlist_file.close()
+  sys.stdout.flush()
+  flist.remove(file)
