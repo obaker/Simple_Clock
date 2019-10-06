@@ -9,7 +9,7 @@ import sys
 import fnmatch
 import random
 import os.path
-#import mad
+#import mutagen
 from mutagen.mp3 import MP3
 source_path="/home/pi/Music/oliver"
 playlist = '/home/pi/alarms/alarmlist.m3u'
