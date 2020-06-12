@@ -74,7 +74,7 @@ if len(argv) > 2:
 if len(argv) < 2:
    db_file = "/home/pi/alarms/clock.db"
 else:
-   db_file = sys.argv[1]
+   db_file = argv[1]
 db = sqlite3.connect(db_file)
 c = db.cursor()
 c.execute('PRAGMA user_version;')
@@ -96,16 +96,36 @@ while True:
       weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
       weekday_numbers = [128, 64, 32, 16, 8, 4, 2]
       dow = 0
-      alarm_time_hr = input("Please input the hour for the alarm \n   ")
-      alarm_time_min = input("Please input the minutes for the alarm \n   ")
-      if len(alarm_time_hr) == 1:
-         alarm_time_hr = "0" + alarm_time_hr
+      while True:
+         alarm_time_hr = input("Please input the hours for the alarm \n   ")
+         if alarm_time_hr.isdigit():
+            if 0 <= int(alarm_time_hr) < 24:
+               if len(alarm_time_hr) == 1:
+                  alarm_time_hr = "0" + alarm_time_hr
+               break
+            else:
+               print ("Hours must be between 0 and 23")
+         else:
+            print ("Please enter a number between 0 and 23")
+      while True:
+         alarm_time_min = input("Please input the minute for the alarm \n   ")
+         if not alarm_time_min:
+               alarm_time_min = "00"
+               break
+         if alarm_time_min.isdigit():
+            if 0 <= int(alarm_time_min) < 60:
+               if len(alarm_time_min) == 1:
+                  alarm_time_min = "0" + alarm_time_min
+               break
+            else:
+               print ("Minutes must be between 0 and 59")
+         else:
+            print ("Please enter a number between 0 and 59")
       alarm_time = alarm_time_hr + ":" + alarm_time_min
       for i in range(7):
          active = input ("Is alarm active on "+weekdays[i] +" (y/N)\n   ").lower()
          if active == "y" or active == "yes":
             dow = dow + weekday_numbers[i]
-
       repeat = input("Does alarm repeat (y/N)\n   ").lower()
       if repeat == "y" or repeat == "yes":
          dow = dow + 1;
