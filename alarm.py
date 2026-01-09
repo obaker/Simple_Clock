@@ -72,7 +72,7 @@ def remove_alarm():
 if len(argv) > 2:
    exit()
 if len(argv) < 2:
-   db_file = "/home/pi/alarms/clock.db"
+   db_file = "/home/ocb/alarms/clock.db"
 else:
    db_file = argv[1]
 db = sqlite3.connect(db_file)
@@ -83,7 +83,7 @@ version = c.fetchone()
 db.close()
 if version is None or version[0] == 0:
    initialise_db()
-if version[0] != 1:
+elif version[0] != 1:
    print("Incompatible DB version")
    exit()
 while True:
@@ -128,7 +128,7 @@ while True:
             dow = dow + weekday_numbers[i]
       repeat = input("Does alarm repeat (y/N)\n   ").lower()
       if repeat == "y" or repeat == "yes":
-         dow = dow + 1;
+         dow += 1
       radio_preset = input("Please choose a radio station, input 0 for local music\n   ")
       if radio_preset == "":
          radio_preset = 0

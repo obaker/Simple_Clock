@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/home/ocb/Simple_Clock/.venv/bin/python3
 from tm1637 import TM1637
 import datetime
 from time import time, sleep, localtime, strftime
@@ -10,6 +10,7 @@ import random
 import os.path
 import threading
 import sqlite3
+from subprocess import run as os_run
 from sys import argv, exit
 DIO=6
 CLK=5
@@ -69,12 +70,12 @@ def view_db(alarm_time, ID):
    db.close()
    return (alarm_time,ID)
 def led_brightness():#function to change brightness of the clock during the day
-    d = datetime.datetime.utcnow()
-    if 8 < d.hour < 21:
+    t = localtime()
+    if 8 < t.tm_hour < 21:
         tm.brightness(7)
-    if 21 <= d.hour < 23:
+    if 21 <= t.tm_hour < 22:
         tm.brightness(2)
-    elif 8 > d.hour or d.hour >= 23:
+    elif 8 > t.tm_hour or t.tm_hour >= 22:
         tm.brightness(0)
 def show_clock(tm):
     t = localtime()
@@ -82,14 +83,14 @@ def show_clock(tm):
 if len(argv) > 2:
    exit()
 if len(argv) < 2:
-   db_file = "/home/pi/alarms/clock.db"
+   db_file = "/home/ocb/alarms/clock.db"
 else:
    db_file = sys.argv[1]
 tm = TM1637(CLK, DIO)    
 led_brightness()
 radio = False
-source_path="/home/pi/Music/oliver"
-alarm_path="/home/pi/alarms/symlinks"
+source_path="/home/ocb/Music/"
+alarm_path="/home/ocb/alarms/symlinks"
 flist = []
 for root, dirs, files in os.walk(source_path, followlinks = True):
   for name in files:
@@ -113,21 +114,26 @@ ID = 0
 normal_volume = 50
 alarm_volume = 20
 alarm_checker = view_db(alarm_time, ID)
-alarm_time = alarm_checker[0] 
+alarm_time = alarm_checker[0]
 ID = alarm_checker[1]
 while True:
     show_clock(tm)
-    if GPIO.input(10) == False:
+    if GPIO.input(9) == False and GPIO.input(10) == False and GPIO.input(11) == False:
+      tm.show("OFF ")
+      sleep(1)
+      tm.show("    ")
+      os_run(["systemctl", "poweroff"])
+    elif GPIO.input(10) == False:
        tm.show("STOP")
        player.stop()
        radio.stop()
-    if GPIO.input(9) == False:
+    elif GPIO.input(9) == False:
        radio.stop()
        tm.show("FLAC")
        player.set_mrl(random.choice(flist))
        player.audio_set_volume(normal_volume)
        player.play()
-    if GPIO.input(11) == False:
+    elif GPIO.input(11) == False:
        player.stop()
        tm.show("RAD ")
        player.audio_set_volume(normal_volume)
@@ -154,7 +160,7 @@ while True:
        player.play()
        remove_alarm(str(alarm_checker[1]))
        alarm_checker = view_db(alarm_time, ID)
-       alarm_time = alarm_checker[0] 
+       alarm_time = alarm_checker[0]
        ID = alarm_checker[1]
     count = strftime("%M", localtime())
     sleep(1)
